@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.054.001.02" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<BkToCstmrDbtCdtNtfctn>
+<GrpHdr>
+  <MsgId>AIK000022122</MsgId> 
+  <CreDtTm>2013-09-30T07:17:29</CreDtTm> 
+<MsgPgntn>
+  <PgNb>1</PgNb> 
+  <LastPgInd>true</LastPgInd> 
+  </MsgPgntn>
+  </GrpHdr>
+<Ntfctn>
+  <Id>AIK000022125</Id> 
+  <CreDtTm>2013-09-30T07:17:29</CreDtTm> 
+<Acct>
+<Id>
+  <IBAN>FR7630056000100010000003957</IBAN> 
+  </Id>
+  <Ccy>EUR</Ccy> 
+  <Nm>HSBC EPARGNE ENTREPRISE</Nm> 
+<Svcr>
+<FinInstnId>
+  <BIC>CCFRFRPP</BIC> 
+  </FinInstnId>
+  </Svcr>
+  </Acct>
+<TxsSummry>
+<TtlCdtNtries>
+ <NbOfNtries>0</NbOfNtries> 
+ <Sum>0.00</Sum> 
+  </TtlCdtNtries>
+<TtlDbtNtries>
+  <NbOfNtries>1</NbOfNtries> 
+  <Sum>10.00</Sum> 
+  </TtlDbtNtries>
+  </TxsSummry>
+<Ntry>
+  <Amt Ccy="EUR">10</Amt> 
+  <CdtDbtInd>DBIT</CdtDbtInd> 
+  <Sts>PDNG</Sts> 
+<BookgDt>
+  <Dt>2013-09-30</Dt> 
+  </BookgDt>
+<ValDt>
+  <Dt>2013-10-07</Dt> 
+  </ValDt>
+  <BkTxCd>
+<Domn>
+  <Cd>PMNT</Cd> 
+<Fmly>
+  <Cd>RDDT</Cd> 
+  <SubFmlyCd>UPDD</SubFmlyCd> 
+  </Fmly>
+  </Domn>
+  </BkTxCd>
+<NtryDtls>
+<TxDtls>
+<Refs>
+  <AcctSvcrRef>175745</AcctSvcrRef> 
+  <EndToEndId>1-AW47LE </EndToEndId> 
+  <MndtId>MD004OES00553301</MndtId> 
+</Refs>
+<AmtDtls>
+<InstdAmt>
+  <Amt Ccy="EUR">10.00</Amt> 
+  </InstdAmt>
+  </AmtDtls>
+<RltdPties>
+<Dbtr>
+  <Nm> FILLARDET </Nm> 
+</Dbtr>
+<DbtrAcct>
+<Id>
+  <IBAN>FR7630077048121233380030021</IBAN> 
+  </Id>
+  </DbtrAcct>
+</RltdPties>
+<RtrInf>
+<Orgtr>
+  <Nm>FILLARDET</Nm> 
+  </Orgtr>
+<Rsn>
+  <Cd>MD06</Cd> 
+  </Rsn>
+  </RtrInf>
+  <AddtlTxInf>SQTP RCUR</AddtlTxInf> 
+  </TxDtls>
+  </NtryDtls>
+  </Ntry>
+</Ntfctn>
+ </BkToCstmrDbtCdtNtfctn>
+ </Document>

@@ -1,0 +1,1 @@
+div.tree div {	 padding-left:16px;	}	div.tree div.parent div {	 display:none;	 cursor:default;	}	div.tree div.parent {	 cursor:pointer !important;	 background:transparent url(plus.gif) no-repeat top left;	}	div.tree div.expanded {	 background:transparent url(moins.gif) no-repeat top left;	}
