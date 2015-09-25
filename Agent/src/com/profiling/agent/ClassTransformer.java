@@ -23,98 +23,74 @@ public class ClassTransformer implements ClassFileTransformer {
 
 	static {
 		try {
-//			stackClazz = ClassPool.getDefault().getCtClass(StackTraceElement[].class.getName());
-//			stackNodeClazz = ClassPool.getDefault().getCtClass(StackTraceNode.class.getName());
-//			CtClass noClazzDef = ClassPool.getDefault().getCtClass(NoClassDefFoundError.class.getName());
 			stackClazz = ClassPool.getDefault().getCtClass(StackTraceElement[].class.getName());
 			stackNodeClazz = ClassPool.getDefault().getCtClass(StackTraceNode.class.getName());
 			CtClass noClazzDef = ClassPool.getDefault().getCtClass(NoClassDefFoundError.class.getName());
 			exceptionArrayClazz = new CtClass[1];
 			exceptionArrayClazz[0] = noClazzDef;
-		} catch (NotFoundException e) {
-			stackClazz = null;
-			stackNodeClazz = null;
-			exceptionArrayClazz = null;
+		} catch (NotFoundException ex) {
+			// FIXME change error log.
+			System.err.println(ex);
 		}
 	}
 
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) {
 
-		// if (loader != null) {
-		System.out.println("**********************");
-		System.out.println("*loader : " + loader);
-		System.out.println("*className " + className);
-		System.out.println("*classBeingRedefined " + classBeingRedefined);
-		System.out.println("*protectionDomain " + protectionDomain);
-		System.out.println("*classfileBuffer " + classfileBuffer);
-		System.out.println("**********************");
-
 		try {
 
 			ByteArrayInputStream byteArray = new java.io.ByteArrayInputStream(classfileBuffer);
 			ClassPool pool = ClassPool.getDefault();
 			CtClass clazz = pool.makeClass(byteArray);
-//			pool.insertClassPath("com/model/StackTraceNode");
-			//
 			
-//			try {
-//				Thread.currentThread().getContextClassLoader().loadClass("com.profiling.model.StackTraceNode");
-//			} catch (ClassNotFoundException e) {
-//				System.err.println("haaaaaaaaaaaaaaaaaaaa "+e);
-//			}
-
-			System.err.println("clazz : " + clazz);
-			System.err.println("clazz package name " + clazz.getPackageName());
+			// Skip interface and agent class.
 			if (clazz != null && !clazz.isInterface() && !clazz.isFrozen() && (clazz.getPackageName()==null || !(clazz.getPackageName().startsWith("com.profiling") || clazz.getPackageName().startsWith("javassist")))){
 
-				System.err.println("clazz name : " + clazz.getName());
-				
+				// Init root stack node.
 				CtField nodeField = new CtField( stackNodeClazz, "ROOT_NODE",clazz);
 				nodeField.setModifiers( Modifier.STATIC );
 				clazz.addField(nodeField);
 
+				// Modify all class methods.
 				for (CtBehavior method : clazz.getDeclaredBehaviors()) {
-					System.err.println("methode name : " + method.getLongName());
+					
+					// Skip abstract and native methods.
 					if (isTransformable(method) && stackClazz != null) {
-						System.err.println("~~ transform methode : " + method.getLongName());
+						
+						// Add exception NoClassDefFoundError for nodes treatments.
 						method.setExceptionTypes(exceptionArrayClazz);
+						
+						// Init local variables.
 						method.addLocalVariable("time", CtClass.longType);
 						method.addLocalVariable("stack", stackClazz);
-						method.addLocalVariable("subStack", stackClazz);
+//						method.addLocalVariable("subStack", stackClazz);
 						
-						
-						method.insertBefore("System.err.println(\"Test\");");
+						// Init the method execution time.
 						method.insertBefore("time = System.currentTimeMillis();");
 						
+						// Retrieve the stack.
 						method.insertAfter("stack =Thread.currentThread().getStackTrace();");
 
-						
-						method.insertAfter("System.err.println(\"Class " + clazz.getName() + " method getLongName "
-								+ method.getLongName() + " time : \"+Long.toString(System.currentTimeMillis()-time));");
-						
-						//FIXME
+						// Add stack to root nodes.
+						//FIXME change log.
 						method.insertAfter("try{ROOT_NODE.ROOT.addNodes(stack, System.currentTimeMillis()-time);}catch(java.lang.NoClassDefFoundError e){System.err.println(\" Exception in "+method.getLongName()+" : \"+e);}");
 
 					}
-					System.err.println("€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€");
 				}
 
-				System.err.println("cla22 : " + clazz);
-				System.err.println("cla22 byte code : " + clazz.toBytecode());
+				// Return modified code.
 				return clazz.toBytecode();
 			}
 		} catch (IOException ex) {
+			// FIXME change error log.
 			System.err.println(ex);
 		} catch (CannotCompileException ex) {
+			// FIXME change error log.
 			System.err.println(ex);
 		} catch (NotFoundException ex) {
+			// FIXME change error log.
 			System.err.println(ex);
 		}
-//		catch (NotFoundException ex) {
-//			System.err.println(ex);
-//		}
-		// }
 		return null;
 	}
 
@@ -122,13 +98,11 @@ public class ClassTransformer implements ClassFileTransformer {
 
 		// Check if method is abstract.
 		if (Modifier.isAbstract(method.getModifiers())) {
-			System.err.println("~~ abstract methode : " + method.getLongName());
 			return false;
 		}
 
 		// Check if method is native.
 		if (Modifier.isNative(method.getModifiers())) {
-			System.err.println("~~ native methode : " + method.getLongName());
 			return false;
 		}
 

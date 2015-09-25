@@ -5,18 +5,39 @@ import java.util.Arrays;
 import java.util.List;
 
 public class StackTraceNode {
+	
+	private static final String ICON_OPEN_TAG = "<icon>";
+	private static final String ICON_CLOSE_TAG = "</icon>";
+	
+	private static final String LINE_LABEL = " line : ";
+	private static final String LINE_OPEN_TAG = "<line>";
+	private static final String LINE_CLOSE_TAG = "</line>";
 
-	public static final StackTraceNode ROOT = new StackTraceNode();
+	private static final String COUNT_LABEL = " count : ";
+	private static final String COUNT_OPEN_TAG = "<count>";
+	private static final String COUNT_CLOSE_TAG = "</count>";
+	
+	private static final String PACKAGE_OPEN_TAG = "<package>";
+	private static final String PACKAGE_CLOSE_TAG = "</package>";
+	
+	private static final String TIME_LABEL = " time : ";
+	private static final String TIME_UNIT = " ms ";
+	private static final String TIME_OPEN_TAG = "<time>";
+	private static final String TIME_CLOSE_TAG = "</time>";
+	
+	public static volatile StackTraceNode ROOT = new StackTraceNode();
 
 	public List<StackTraceNode> children = new ArrayList<StackTraceNode>();
 
+	public String id = Integer.toHexString(super.hashCode());
+	
 	public String name;
 
 	public String nodeLongName;
 
 	public String keyName;
-
-	public int count = 0;
+	
+	public int count = 1;
 
 	public long time = 0;
 
@@ -30,15 +51,11 @@ public class StackTraceNode {
 		name = "root";
 	}
 
-	public StackTraceNode(StackTraceElement stackTraceElement) {
+	public StackTraceNode(StackTraceElement stackTraceElement, long ptime) {
 		keyName = stackTraceElement.toString();
 		name = stackTraceElement.getClassName() + "." + stackTraceElement.getMethodName();
 		line = (stackTraceElement.getLineNumber() > 0 ? stackTraceElement.getLineNumber() : -1);
 		isNative = stackTraceElement.isNativeMethod();
-	}
-	
-	public StackTraceNode(StackTraceElement stackTraceElement, long ptime) {
-		this(stackTraceElement);
 		time = ptime;
 	}
 
@@ -80,43 +97,14 @@ public class StackTraceNode {
 			if (childIndex < 0) {
 				childIndex = children.size();
 				children.add(node);
-			}
-
-			if (lastIndex > 0) {
-				children.get(childIndex).addNodes(Arrays.copyOfRange(stackElement2Store, 1, lastIndex));
-			}
-		}
-
-		return true;
-	}
-
-	public boolean addNodes(StackTraceElement[] stackElement2Store) {
-
-		if (stackElement2Store == null) {
-
-			System.out.println("***ERRRRRRRRRRRRRRRRRRRRRRORRRRRRR***");
-			return false;
-		}
-
-		if (stackElement2Store.length > 0) {
-
-			int lastIndex = stackElement2Store.length - 1;
-
-			StackTraceNode node = new StackTraceNode(stackElement2Store[lastIndex]);
-
-			int childIndex = children.indexOf(node);
-
-			if (childIndex < 0) {
-				childIndex = children.size();
-				children.add(node);
 			} else {
-				count++;
+				children.get(childIndex).count++;
+				children.get(childIndex).time += pTime;
 			}
 
 			if (lastIndex > 0) {
-				children.get(childIndex).addNodes(Arrays.copyOf(stackElement2Store, lastIndex));
+				children.get(childIndex).addNodes(Arrays.copyOfRange(stackElement2Store, 1, lastIndex), pTime);
 			}
-
 		}
 
 		return true;
@@ -126,11 +114,6 @@ public class StackTraceNode {
 	public String toString() {
 		String result = "";
 		result += "<child>";
-		// result += (keyName != null) ? ("<keyName>" + keyName.replaceAll("<", "{").replaceAll(">", "}") +
-		// "</keyName>") : "";
-		// result += (name != null) ? ("<name>" + name.replaceAll("<", "{").replaceAll(">", "}") + "</name>") : "";
-		// result += (nodeLongName != null) ? ("<nodeLongName>" + nodeLongName.replaceAll("<", "{").replaceAll(">", "}")
-		// + "</nodeLongName>") : "";
 		result += (keyName != null) ? ("<keyName>" + keyName + "</keyName>") : "";
 		result += (name != null) ? ("<name>" + name + "</name>") : "";
 		result += (nodeLongName != null) ? ("<nodeLongName>" + nodeLongName + "</nodeLongName>") : "";
@@ -143,5 +126,46 @@ public class StackTraceNode {
 			result += "<element>" + child.toString() + "</element>";
 		}
 		return result + "</child>";
+	}
+	
+	public String toHtml(){
+		String result ="";
+		result += "<ul class=\"root\">";
+		for (StackTraceNode child : children) {
+			result += child.toHtmlTree();
+		}
+		result += "</ul>";
+		return result;
+	}
+	
+	public String toHtmlTree() {
+		String result ="";
+		if (children.isEmpty()){
+			result += "<li>";
+			result += name;
+			result += (line> 0) ? LINE_OPEN_TAG + LINE_LABEL + line + LINE_CLOSE_TAG:"";
+			result += COUNT_OPEN_TAG + COUNT_LABEL + count + COUNT_CLOSE_TAG;
+			result += TIME_OPEN_TAG + TIME_LABEL + time + TIME_UNIT + TIME_CLOSE_TAG;
+			result += PACKAGE_OPEN_TAG + name.substring(0, name.lastIndexOf('.')) + PACKAGE_CLOSE_TAG;
+			result += "</li>";
+		} else {
+			result += "<li>";;
+			result += "<input type=\"checkbox\" id=\"" + keyName + id + "\" />";
+			result += "<label for=\"" + keyName + id + "\" class=\"plus\">" + ICON_OPEN_TAG + "+ " + ICON_CLOSE_TAG + "</label>";
+			result += "<label for=\"" + keyName + id + "\" class=\"minus\">" + ICON_OPEN_TAG+"- " + ICON_CLOSE_TAG + "</label>";
+			result += "<label for=\"" + keyName + id + "\">";
+			result += name;
+			result += (line> 0) ? LINE_OPEN_TAG + LINE_LABEL + line + LINE_CLOSE_TAG:"";
+			result += COUNT_OPEN_TAG + COUNT_LABEL + count + COUNT_CLOSE_TAG;
+			result += TIME_OPEN_TAG + TIME_LABEL + time + TIME_UNIT +  TIME_CLOSE_TAG;
+			result += PACKAGE_OPEN_TAG + name.substring(0, name.lastIndexOf('.')) + PACKAGE_CLOSE_TAG;
+			result += "</label>";
+			result += "<ul>";
+			for (StackTraceNode child : children) {
+				result += child.toHtmlTree();
+			}
+			result += "</ul>";
+		}
+		return result;
 	}
 }
