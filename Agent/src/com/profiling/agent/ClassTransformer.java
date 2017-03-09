@@ -70,10 +70,18 @@ public class ClassTransformer implements ClassFileTransformer {
 						
 						// Retrieve the stack.
 						method.insertAfter("stack =Thread.currentThread().getStackTrace();");
-
+						
+						
+//						method.insertAfter("System.out.println(\"*********************************************\");");
+//						method.insertAfter("System.out.println(\"Method name : +"+method.getName()+"\");");
+//						method.insertAfter("System.out.println(\"Method long name : +"+method.getLongName()+"\");");
+//						method.insertAfter("System.out.println(\"Method info : +"+method.getMethodInfo().+"\");");
+//						method.insertAfter("System.out.println(\"Method info 2 : +"+method.getMethodInfo2()+"\");");
+//						method.insertAfter("System.out.println(\"*********************************************\");");
+						
 						// Add stack to root nodes.
 						//FIXME change log.
-						method.insertAfter("try{ROOT_NODE.ROOT.addNodes(stack, System.currentTimeMillis()-time);}catch(java.lang.NoClassDefFoundError e){System.err.println(\" Exception in "+method.getLongName()+" : \"+e);}");
+						method.insertAfter("try{ROOT_NODE.ROOT.addInformations(stack, System.currentTimeMillis()-time);}catch(java.lang.NoClassDefFoundError e){System.err.println(\" Exception in "+method.getLongName()+" : \"+e);}");
 
 					}
 				}

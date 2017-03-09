@@ -52,6 +52,14 @@ public class StackTraceNode {
 	}
 
 	public StackTraceNode(StackTraceElement stackTraceElement, long ptime) {
+		
+		System.out.println("************************************************************************");
+		System.out.println("stackTraceElement.getFileName() : "+stackTraceElement.getFileName());
+		System.out.println("stackTraceElement.getClassName() : "+stackTraceElement.getClassName());
+		System.out.println("stackTraceElement.getLineNumber() : "+stackTraceElement.getLineNumber());
+		System.out.println("stackTraceElement.getMethodName() : "+stackTraceElement.getMethodName());
+		System.out.println("************************************************************************");
+		
 		keyName = stackTraceElement.toString();
 		name = stackTraceElement.getClassName() + "." + stackTraceElement.getMethodName();
 		line = (stackTraceElement.getLineNumber() > 0 ? stackTraceElement.getLineNumber() : -1);
@@ -84,9 +92,14 @@ public class StackTraceNode {
 		return true;
 	}
 
+	public boolean addInformations(StackTraceElement[] stackElement2Store, long pTime) {
+		time += pTime;
+		return addNodes(stackElement2Store, pTime);
+	}
+	
 	public boolean addNodes(StackTraceElement[] stackElement2Store, long pTime) {
 
-		if (stackElement2Store!=null && stackElement2Store.length > 0) {
+		if (stackElement2Store!=null && stackElement2Store.length > 1) {
 
 			int lastIndex = stackElement2Store.length - 1;
 
@@ -98,12 +111,14 @@ public class StackTraceNode {
 				childIndex = children.size();
 				children.add(node);
 			} else {
-				children.get(childIndex).count++;
 				children.get(childIndex).time += pTime;
+				if (lastIndex < 2){
+					children.get(childIndex).count++;
+				}
 			}
 
 			if (lastIndex > 0) {
-				children.get(childIndex).addNodes(Arrays.copyOfRange(stackElement2Store, 1, lastIndex), pTime);
+				children.get(childIndex).addNodes(Arrays.copyOfRange(stackElement2Store, 0, lastIndex), pTime);
 			}
 		}
 
@@ -130,7 +145,10 @@ public class StackTraceNode {
 	
 	public String toHtml(){
 		String result ="";
-		result += "<ul class=\"root\">";
+		result += "<label class=\"totaltime\">";
+		result += "total time : " + time + " ms";
+		result += "</label>";
+		result += "<ul>";
 		for (StackTraceNode child : children) {
 			result += child.toHtmlTree();
 		}

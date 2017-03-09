@@ -84,6 +84,10 @@ public class TreeReportBuilder {
 		result +="package {";
 		result +="display: none;";
 		result +="}";
+		result +=".totaltime {";
+		result +="color: blue;";
+		result +="font-weight: bold;";
+		result +="}";
 		
 		// Close opened tags.
 		result +="</style>";
@@ -95,14 +99,6 @@ public class TreeReportBuilder {
 	
 	private void generateHtmlBody() throws IOException {
 		String result = "<body>";
-		
-		// TODO TEST
-//		result += "<input type=\"checkbox\" id=\"defaultPackage\" class=\"defaultPackage\"/>"
-//				+ "<label class=\"plus\">+ </label>"
-//				+ "<label class=\"minus\">- </label>"
-//				+ "<label class=\"display\">display java package</label>"
-//				+ "<label class=\"hide\">hide java package</label>";
-		
 		
 		result += StackTraceNode.ROOT.toHtml().replaceAll("<init>", "{init}").replaceAll("<clinit>", "{clinit}");
 		result += "</body>";
